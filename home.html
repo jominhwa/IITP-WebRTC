@@ -17,7 +17,9 @@
     <input type="text" id="roomname" placeholder="Roomname" required autocomplete="off">
     <button onclick="MakeRoom();return false;">방만들기</button>
   </form>
-
+  <hr>
+  <h3>RoomList</h3>
+  <div id="roomList"></div>
   <!-- This file is automatically added/served when running "node index.js". -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
@@ -26,3 +28,4 @@
 </body>
 
 </html>
+

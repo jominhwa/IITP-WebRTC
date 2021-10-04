@@ -52,8 +52,19 @@ var io = require('socket.io')(server);
 
 var roomname;
 
-io.sockets.on('connection', function(socket) {
+const Rooms = [];
+function RoomList(data) {
+  const meeting_info = {
+    meeting_name : data,
+  }
+  Rooms.push(meeting_info);
+  return Rooms;
+}
 
+
+
+io.sockets.on('connection', function(socket) {
+  socket.emit('create', Rooms);
   // convenience function to log server messages on the client
   function log() {
     var array = ['Message from server:'];
@@ -62,15 +73,15 @@ io.sockets.on('connection', function(socket) {
   }
   
   socket.on('make a room', function(room){
-    roomname = room;
+    io.sockets.emit('create', RoomList(room));
   });
-
+  
   socket.on('message', function(message) {
     log('Client said: ', message);
     socket.broadcast.emit('message', message);
   });
 
-  socket.on('create or join', function(room) {
+  socket.on('join', function(room) {
     log('Received request to create or join room ' + room);
     roomname = room;
     var clientsInRoom = io.sockets.adapter.rooms[room];
@@ -78,14 +89,12 @@ io.sockets.on('connection', function(socket) {
     log('Room ' + room + ' now has ' + numClients + ' client(s)');
 
     if (numClients === 0) {
-      socket.join(room);
       log('Client ID ' + socket.id + ' created room ' + room);
       socket.emit('created', room, socket.id);
 
     } else if (numClients === 1) {
       log('Client ID ' + socket.id + ' joined room ' + room);
       io.sockets.in(room).emit('join', room);
-      socket.join(room);
       socket.emit('joined', room, socket.id);
       io.sockets.in(room).emit('ready');
     } else { // max two clients
@@ -96,10 +105,8 @@ io.sockets.on('connection', function(socket) {
   socket.on('roominfo', function(){
     var clientsInRoom = io.sockets.adapter.rooms[roomname];
     var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
-    socket.emit('roominfo', roomname);
-	  console.log(numClients);
     socket.join(roomname);
-
+    socket.emit('roominfo', roomname);
     if (numClients === 0) {
       socket.emit('room_state', 'created');
     }
