@@ -30,7 +30,7 @@ var socket = io.connect();
 
 
 
-var room;
+var roomname;
 
 
 socket.emit('roominfo');
@@ -39,8 +39,8 @@ socket.emit('roominfo');
 
 
 socket.on('roominfo', function(room){
-  room = room;
-  document.getElementById("room").innerHTML = "This is " + room + " Room";
+  roomname = room;
+  document.getElementById("room").innerHTML = "This is " + roomname + " Room";
 });
 
 socket.on('room_state', function(msg) {

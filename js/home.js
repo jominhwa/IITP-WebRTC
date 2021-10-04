@@ -1,20 +1,51 @@
 'use strict';
 
+
+
 var socket = io.connect();
 
-var room;
+var roomname;
 
 function MakeRoom(){
-  room = document.getElementById("roomname").value;
-  socket.emit('make a room', room);	
-  if (room !== '') {
-    socket.emit('create or join', room);
-    console.log('Attempted to create or  join room', room);
-  }	
+  roomname = document.getElementById("roomname").value;
+  console.log('Attempted to create room', roomname);
+  socket.emit('make a room', roomname);
+  
 }
-socket.on('created', function(room) {
-  console.log('Created room ' + room);
-  window.location.href = '/main.html?roomname=' + room;
+
+socket.on('create', function(rooms) {
+  //console.log('Created room ' + room);
+
+  var RoomList = document.getElementById("roomList");
+  RoomList.innerHTML = "";
+
+  rooms.forEach(room => {
+    var newP = document.createElement("p");
+    var RoomText = document.createTextNode(room.meeting_name);
+    newP.appendChild(RoomText);
+
+    var EntryBtn = document.createElement("button");
+    var EntryText = document.createTextNode("방입장");
+    EntryBtn.setAttribute("class", "entry");
+    EntryBtn.appendChild(EntryText);
+	
+    newP.appendChild(EntryBtn);
+
+  
+    RoomList.insertBefore(newP,RoomList.childNodes[0]);
+  });
+
+  
+  var entryBtn = document.getElementsByClassName("entry");
+  for (var i=0; i<entryBtn.length; i++) { 
+	  entryBtn[i].addEventListener("click", function() {  
+      var EntryRoomname;
+	  // socket.emit('NumClient Check', room.num);
+    // EntryRoom(this.previousSibling.nodeValue, this.nextSibling.nodeValue);
+	    EntryRoomname = this.previousSibling.nodeValue;
+      EntryRoom(EntryRoomname);
+    });
+  }
 });
 
 socket.on('full', function(room) {
@@ -28,9 +59,17 @@ socket.on('join', function (room){
 
 socket.on('joined', function(room) {
   console.log('joined: ' + room);
-  window.location.href = '/main.html?roomname=' + room;
 });
 
+///////////////////////////////////////////////
+
+
+
+function EntryRoom(room){
+  socket.emit('join', room);
+  console.log('Attempted to join room', room);
+  window.location.href = '/main.html?roomname=' + room;
+}
 
 ////////////////////////////////////////////////
 
