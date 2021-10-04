@@ -29,7 +29,14 @@ app.use('/css', express.static(__dirname + "/css"));
 ////////////////////////////////////////////////////////////////////
 
 app.get('/', function(req, res){
-   fs.readFile('main.html',function(error,data){
+   fs.readFile('home.html',function(error,data){
+                  res.writeHead(200,{'Content-type' : 'text/html'});
+                  res.end(data);
+      });
+});
+
+app.get('/main.html?:roomname', function(req, res){
+	fs.readFile('main.html',function(error,data){
                   res.writeHead(200,{'Content-type' : 'text/html'});
                   res.end(data);
       });
@@ -40,6 +47,11 @@ var fileServer = new(nodeStatic.Server)();
 var server = https.createServer(options, app).listen(3000);
 var io = require('socket.io')(server);
 
+
+//변수
+
+var roomname;
+
 io.sockets.on('connection', function(socket) {
 
   // convenience function to log server messages on the client
@@ -48,16 +60,19 @@ io.sockets.on('connection', function(socket) {
     array.push.apply(array, arguments);
     socket.emit('log', array);
   }
+  
+  socket.on('make a room', function(room){
+    roomname = room;
+  });
 
   socket.on('message', function(message) {
     log('Client said: ', message);
-    // for a real app, would be room-only (not broadcast)
     socket.broadcast.emit('message', message);
   });
 
   socket.on('create or join', function(room) {
     log('Received request to create or join room ' + room);
-
+    roomname = room;
     var clientsInRoom = io.sockets.adapter.rooms[room];
     var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
     log('Room ' + room + ' now has ' + numClients + ' client(s)');
@@ -76,6 +91,23 @@ io.sockets.on('connection', function(socket) {
     } else { // max two clients
       socket.emit('full', room);
     }
+  });
+  
+  socket.on('roominfo', function(){
+    var clientsInRoom = io.sockets.adapter.rooms[roomname];
+    var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
+    socket.emit('roominfo', roomname);
+	  console.log(numClients);
+    socket.join(roomname);
+
+    if (numClients === 0) {
+      socket.emit('room_state', 'created');
+    }
+    if (numClients === 1) {
+      io.sockets.in(roomname).emit('room_state', 'join');
+      socket.emit('room_state', 'joined');
+    }
+   
   });
 
   socket.on('ipaddr', function() {
