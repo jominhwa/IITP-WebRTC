@@ -5,6 +5,10 @@
 var socket = io.connect();
 
 var roomname;
+var username;
+
+socket.emit('get username');
+
 
 function MakeRoom(){
   roomname = document.getElementById("roomname").value;
@@ -19,8 +23,13 @@ function EntryRoom(room){
   window.location.href = '/main.html?roomname=' + room;
 }
 
+socket.on('get username', function(user){
+  username = user;
+  document.getElementById("usertext").innerHTML = username +"님";
+});
+
 socket.on('create', function(rooms) {
-  //console.log('Created room ' + room);
+//  console.log('Created room ' + room);
 
   var RoomList = document.getElementById("roomList");
   RoomList.innerHTML = "";
@@ -36,18 +45,19 @@ socket.on('create', function(rooms) {
     EntryBtn.appendChild(EntryText);
 	
     newP.appendChild(EntryBtn);
+
     var NumText = document.createTextNode(room.meeting_num);
-    
     RoomList.insertBefore(newP,RoomList.childNodes[0]);
     newP.appendChild(NumText); 
   });
 
+  
   var EntryRoomname;
   var EntryRoomnum;
   var entryBtn = document.getElementsByClassName("entry");
   for (var i=0; i<entryBtn.length; i++) { 
-    entryBtn[i].addEventListener("click", function() {  
-      EntryRoomname = this.previousSibling.nodeValue;
+	  entryBtn[i].addEventListener("click", function() {  
+	    EntryRoomname = this.previousSibling.nodeValue;
       EntryRoomnum = this.nextSibling.nodeValue;
       if(EntryRoomnum < 2){
         EntryRoom(EntryRoomname);
@@ -77,6 +87,7 @@ socket.on('joined', function(room) {
 
 
 
+
 ////////////////////////////////////////////////
 
 function sendMessage(message) {
@@ -88,5 +99,7 @@ function sendMessage(message) {
 ////////////////////////////////////////////////////
 
 window.onbeforeunload = function() {
+  socket.emit('socket Data', username);
+
   sendMessage('bye');
 };

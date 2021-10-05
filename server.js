@@ -29,7 +29,14 @@ app.use('/css', express.static(__dirname + "/css"));
 ////////////////////////////////////////////////////////////////////
 
 app.get('/', function(req, res){
-   fs.readFile('home.html',function(error,data){
+   fs.readFile('login.html',function(error,data){
+                  res.writeHead(200,{'Content-type' : 'text/html'});
+                  res.end(data);
+      });
+});
+
+app.get('/home.html', function(req, res){
+        fs.readFile('home.html',function(error,data){
                   res.writeHead(200,{'Content-type' : 'text/html'});
                   res.end(data);
       });
@@ -51,6 +58,7 @@ var io = require('socket.io')(server);
 //변수
 
 var roomname;
+var username;
 
 const Rooms = [];
 const RoomNumClient = [];
@@ -75,6 +83,15 @@ io.sockets.on('connection', function(socket) {
     socket.emit('log', array);
   }
   
+  socket.on('set username', function(user){
+    username = user;
+  });
+
+  socket.on('get username', function(){
+    socket.username = username;
+    socket.emit('get username', username);
+  });
+
   socket.on('make a room', function(room){
     RoomNumClient[room] = 0;
     io.sockets.emit('create', RoomList(room));
@@ -87,22 +104,21 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('join', function(room) {
     log('Received request to create or join room ' + room);
-    roomname = room;
+    roomname = room; 
+    username = socket.username;
+
     RoomNumClient[roomname] += 1;
     const index = Rooms.findIndex(obj => obj.meeting_name == roomname);
     Rooms[index].meeting_num = RoomNumClient[roomname];
-    
+
     var clientsInRoom = io.sockets.adapter.rooms[room];
     var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
     log('Room ' + room + ' now has ' + numClients + ' client(s)');
-   
+
     io.sockets.emit('create', Rooms);
 
     if (numClients === 0) {
       log('Client ID ' + socket.id + ' created room ' + room);
-      
-      //socket.emit('created', room, );
-
     } else if (numClients === 1) {
       log('Client ID ' + socket.id + ' joined room ' + room);
       io.sockets.in(room).emit('join', room);
@@ -117,8 +133,9 @@ io.sockets.on('connection', function(socket) {
     var clientsInRoom = io.sockets.adapter.rooms[roomname];
     var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
     socket.join(roomname);
-    
-    socket.emit('roominfo', roomname);
+    socket.username = username;
+  
+    socket.emit('roominfo', {roomname, username});
     if (numClients === 0) {
       socket.emit('room_state', 'created');
     }
@@ -139,7 +156,10 @@ io.sockets.on('connection', function(socket) {
       });
     }
   });
-
+  socket.on('socket Data', function(user){
+     username = user;
+	  console.log(username);
+  });
   socket.on('bye', function(){
     console.log('received bye');
   });
