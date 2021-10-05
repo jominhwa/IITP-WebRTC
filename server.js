@@ -60,6 +60,9 @@ var io = require('socket.io')(server);
 var roomname;
 var username;
 
+var isHangup = false;
+var HangUp_user;
+
 const Rooms = [];
 const RoomNumClient = [];
 
@@ -86,17 +89,44 @@ io.sockets.on('connection', function(socket) {
   socket.on('set username', function(user){
     username = user;
   });
+  
 
   socket.on('get username', function(){
-    socket.username = username;
-    socket.emit('get username', username);
+    if(isHangup === false){
+      socket.username = username;
+      socket.emit('get username', username);
+    }
+    else {
+      socket.username = HangUp_user;
+      socket.emit('get username', HangUp_user);
+      isHangup = false;
+    }
+  });
+
+  socket.on('reload Data', function(user){
+    username = user;
   });
 
   socket.on('make a room', function(room){
     RoomNumClient[room] = 0;
     io.sockets.emit('create', RoomList(room));
   });
+
+  socket.on('hang up', function(data){
+    isHangup = true;
+    roomname = data.roomname; 
+    HangUp_user = data.username;
+    RoomNumClient[roomname] -= 1;
+    const index = Rooms.findIndex(obj => obj.meeting_name == roomname);
+    Rooms[index].meeting_num = RoomNumClient[roomname];
+
+    io.sockets.emit('create', Rooms);
+
+    socket.broadcast.to(roomname).emit('remote hang up');
+
+  });
   
+ 
   socket.on('message', function(message) {
     log('Client said: ', message);
     socket.broadcast.emit('message', message);
