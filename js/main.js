@@ -31,16 +31,14 @@ var socket = io.connect();
 
 
 var roomname;
-
-
+var username;
 socket.emit('roominfo');
 
-
-
-
 socket.on('roominfo', function(room){
-  roomname = room;
+  roomname = room.roomname;
+  username = room.username;
   document.getElementById("room").innerHTML = "This is " + roomname + " Room";
+  document.getElementById("username").innerHTML = "User : " + username;
 });
 
 socket.on('room_state', function(msg) {
@@ -255,3 +253,4 @@ function stop() {
   pc.close();
   pc = null;
 }
+
