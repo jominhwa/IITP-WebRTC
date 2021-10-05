@@ -13,13 +13,15 @@
 
   <h1>Realtime communication with WebRTC</h1>
   <p id="room">This is <%= room %>Room!</p>
-  <p id="username">This is <%= username %>Room!</p>
+  <p id="username"> User : <%= username %></p>
   <br>
   <div id="videos">
     <video id="localVideo" autoplay muted playsinline></video>
     <video id="remoteVideo" autoplay playsinline></video>
   </div>
-  
+  <hr>
+  <button id ="cameraButton" onclick="cameraBTN()">카메라끄기</button>
+  <button id ="audioButton" onclick="audioBTN()">마이크끄기</button>
   <!-- This file is automatically added/served when running "node index.js". -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
