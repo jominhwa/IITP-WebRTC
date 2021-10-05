@@ -50,6 +50,9 @@ socket.on('room_state', function(msg) {
   }
 });
 
+socket.on('remote hang up', function() {
+  location.reload();
+});
 
 socket.on('log', function(array) {
   console.log.apply(console, array);
@@ -161,6 +164,15 @@ function audioBTN(){
   localStream.getAudioTracks()[0].enabled = !(localStream.getAudioTracks()[0].enabled);
 }
 
+async function hangupBTN() {
+  
+  socket.emit('hang up', {roomname, username});
+  
+  if(pc != null){
+    hangup();
+  }
+  window.location.href = "/home.html";
+}
 
 window.onbeforeunload = function() {
   sendMessage('bye');
