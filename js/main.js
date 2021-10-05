@@ -49,6 +49,10 @@ socket.on('room_state', function(msg) {
     isChannelReady = true;
   }
 });
+socket.on('get remotename', function(user){
+  document.getElementById("remotename").innerHTML = "상대방 : " + user;
+  socket.emit('notice username', {roomname, username});
+});
 
 socket.on('remote hang up', function() {
   location.reload();
