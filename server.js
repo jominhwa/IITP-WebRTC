@@ -187,10 +187,14 @@ io.sockets.on('connection', function(socket) {
     if (numClients === 1) {
       io.sockets.in(roomname).emit('room_state', 'join');
       socket.emit('room_state', 'joined');
+      socket.broadcast.to(roomname).emit('get remotename', username);
     }
    
   });
-
+  
+  socket.on('notice username', function(data){
+    socket.broadcast.to(data.roomname).emit('get remotename', data.username);
+  });
   socket.on('ipaddr', function() {
     var ifaces = os.networkInterfaces();
     for (var dev in ifaces) {
