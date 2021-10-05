@@ -108,8 +108,14 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('make a room', function(room){
-    RoomNumClient[room] = 0;
-    io.sockets.emit('create', RoomList(room));
+    const index = Rooms.findIndex(obj => obj.meeting_name == room);
+    if(index === -1){
+      RoomNumClient[room] = 0;
+      io.sockets.emit('create', RoomList(room));
+    }
+    else{ 
+      socket.emit('already exist');
+    }
   });
 
   socket.on('hang up', function(data){

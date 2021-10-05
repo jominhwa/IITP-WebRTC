@@ -28,6 +28,9 @@ socket.on('get username', function(user){
   document.getElementById("usertext").innerHTML = username +"님";
 });
 
+socket.on('already exist', function(){
+  alert("이미 존재하는 방입니다.");
+});
 socket.on('create', function(rooms) {
 //  console.log('Created room ' + room);
 
