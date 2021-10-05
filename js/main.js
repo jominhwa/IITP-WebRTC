@@ -92,13 +92,15 @@ var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
 
 navigator.mediaDevices.getUserMedia({
-  audio: false,
+  audio: true,
   video: true
 })
 .then(gotStream)
 .catch(function(e) {
   alert('getUserMedia() error: ' + e.name);
 });
+
+
 
 function gotStream(stream) {
   console.log('Adding local stream.');
@@ -111,6 +113,7 @@ function gotStream(stream) {
 }
 
 var constraints = {
+  audio: true,
   video: true
 };
 
@@ -135,6 +138,29 @@ function maybeStart() {
     }
   }
 }
+
+function cameraBTN(){
+	var text = document.getElementById("cameraButton").innerHTML;
+	if(text == "카메라켜기"){
+		document.getElementById("cameraButton").innerHTML = "카메라끄기";
+	}
+	else if(text == "카메라끄기"){ 
+		document.getElementById("cameraButton").innerHTML = "카메라켜기";	
+	}
+	localStream.getVideoTracks()[0].enabled = !(localStream.getVideoTracks()[0].enabled);
+}
+
+function audioBTN(){
+  var text = document.getElementById("audioButton").innerHTML;
+  if(text == "마이크켜기"){
+    document.getElementById("audioButton").innerHTML = "마이크끄기";
+  }
+  else if(text == "마이크끄기"){
+    document.getElementById("audioButton").innerHTML = "마이크켜기";
+  }
+  localStream.getAudioTracks()[0].enabled = !(localStream.getAudioTracks()[0].enabled);
+}
+
 
 window.onbeforeunload = function() {
   sendMessage('bye');
