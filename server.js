@@ -68,8 +68,9 @@ const RoomNumClient = [];
 
 function RoomList(data) {
   const meeting_info = {
-    meeting_name : data,
-    meeting_num :  RoomNumClient[data],
+    meeting_master : data.username,
+    meeting_name : data.roomname,
+    meeting_num :  RoomNumClient[data.roomname],
   }
   Rooms.push(meeting_info);
   return Rooms;
@@ -100,17 +101,25 @@ io.sockets.on('connection', function(socket) {
       socket.username = HangUp_user;
       socket.emit('get username', HangUp_user);
       isHangup = false;
+      socket.emit('create', Rooms);
     }
   });
 
-  socket.on('reload Data', function(user){
-    username = user;
+  socket.on('delete room', function(room){
+    if(RoomNumClient[room] == 0) {
+      const index = Rooms.findIndex(obj => obj.meeting_name == room);
+      Rooms.pop(Rooms[index]);
+      io.sockets.emit('create', Rooms);
+    }
+    else {
+      socket.emit("delete_error");
+    }
   });
 
   socket.on('make a room', function(room){
-    const index = Rooms.findIndex(obj => obj.meeting_name == room);
+    const index = Rooms.findIndex(obj => obj.meeting_name == room.roomname);
     if(index === -1){
-      RoomNumClient[room] = 0;
+      RoomNumClient[room.roomname] = 0;
       io.sockets.emit('create', RoomList(room));
     }
     else{ 
@@ -201,3 +210,4 @@ io.sockets.on('connection', function(socket) {
   });
 
 });
+
