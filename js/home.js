@@ -13,6 +13,12 @@ function MakeRoom(){
   
 }
 
+function EntryRoom(room){
+  socket.emit('join', room);
+  console.log('Attempted to join room', room);
+  window.location.href = '/main.html?roomname=' + room;
+}
+
 socket.on('create', function(rooms) {
   //console.log('Created room ' + room);
 
@@ -30,20 +36,26 @@ socket.on('create', function(rooms) {
     EntryBtn.appendChild(EntryText);
 	
     newP.appendChild(EntryBtn);
-
-  
+    var NumText = document.createTextNode(room.meeting_num);
+    
     RoomList.insertBefore(newP,RoomList.childNodes[0]);
+    newP.appendChild(NumText); 
   });
 
-  
+  var EntryRoomname;
+  var EntryRoomnum;
   var entryBtn = document.getElementsByClassName("entry");
   for (var i=0; i<entryBtn.length; i++) { 
-	  entryBtn[i].addEventListener("click", function() {  
-      var EntryRoomname;
-	  // socket.emit('NumClient Check', room.num);
-    // EntryRoom(this.previousSibling.nodeValue, this.nextSibling.nodeValue);
-	    EntryRoomname = this.previousSibling.nodeValue;
-      EntryRoom(EntryRoomname);
+    entryBtn[i].addEventListener("click", function() {  
+      EntryRoomname = this.previousSibling.nodeValue;
+      EntryRoomnum = this.nextSibling.nodeValue;
+      if(EntryRoomnum < 2){
+        EntryRoom(EntryRoomname);
+      }
+      else {
+        alert("입장 가능 인원이 초과되어 입장이 불가능합니다");
+      }
+
     });
   }
 });
@@ -65,12 +77,6 @@ socket.on('joined', function(room) {
 
 
 
-function EntryRoom(room){
-  socket.emit('join', room);
-  console.log('Attempted to join room', room);
-  window.location.href = '/main.html?roomname=' + room;
-}
-
 ////////////////////////////////////////////////
 
 function sendMessage(message) {
@@ -84,4 +90,3 @@ function sendMessage(message) {
 window.onbeforeunload = function() {
   sendMessage('bye');
 };
-

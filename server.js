@@ -53,9 +53,12 @@ var io = require('socket.io')(server);
 var roomname;
 
 const Rooms = [];
+const RoomNumClient = [];
+
 function RoomList(data) {
   const meeting_info = {
     meeting_name : data,
+    meeting_num :  RoomNumClient[data],
   }
   Rooms.push(meeting_info);
   return Rooms;
@@ -73,6 +76,7 @@ io.sockets.on('connection', function(socket) {
   }
   
   socket.on('make a room', function(room){
+    RoomNumClient[room] = 0;
     io.sockets.emit('create', RoomList(room));
   });
   
@@ -84,13 +88,20 @@ io.sockets.on('connection', function(socket) {
   socket.on('join', function(room) {
     log('Received request to create or join room ' + room);
     roomname = room;
+    RoomNumClient[roomname] += 1;
+    const index = Rooms.findIndex(obj => obj.meeting_name == roomname);
+    Rooms[index].meeting_num = RoomNumClient[roomname];
+    
     var clientsInRoom = io.sockets.adapter.rooms[room];
     var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
     log('Room ' + room + ' now has ' + numClients + ' client(s)');
+   
+    io.sockets.emit('create', Rooms);
 
     if (numClients === 0) {
       log('Client ID ' + socket.id + ' created room ' + room);
-      socket.emit('created', room, socket.id);
+      
+      //socket.emit('created', room, );
 
     } else if (numClients === 1) {
       log('Client ID ' + socket.id + ' joined room ' + room);
@@ -106,6 +117,7 @@ io.sockets.on('connection', function(socket) {
     var clientsInRoom = io.sockets.adapter.rooms[roomname];
     var numClients = clientsInRoom ? Object.keys(clientsInRoom.sockets).length : 0;
     socket.join(roomname);
+    
     socket.emit('roominfo', roomname);
     if (numClients === 0) {
       socket.emit('room_state', 'created');
