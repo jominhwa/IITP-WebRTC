@@ -13,7 +13,7 @@ socket.emit('get username');
 function MakeRoom(){
   roomname = document.getElementById("roomname").value;
   console.log('Attempted to create room', roomname);
-  socket.emit('make a room', roomname);
+  socket.emit('make a room', {username, roomname});
   
 }
 
@@ -52,8 +52,23 @@ socket.on('create', function(rooms) {
     var NumText = document.createTextNode(room.meeting_num);
     RoomList.insertBefore(newP,RoomList.childNodes[0]);
     newP.appendChild(NumText); 
-  });
+  
+	 console.log(room.meeting_master);
+	  console.log(username);
+    if(room.meeting_master === username){
+      var DeleteBtn = document.createElement("button");
+      var DeleteText = document.createTextNode("방삭제");
+      DeleteBtn.setAttribute("class", "delete");
+      DeleteBtn.appendChild(DeleteText);
+      newP.appendChild(DeleteBtn);
 
+      DeleteBtn.addEventListener("click", function() {
+        //handleDeleteRoom(room.meeting_name);
+        socket.emit("delete room", room.meeting_name);
+      });
+    }
+
+  });
   
   var EntryRoomname;
   var EntryRoomnum;
@@ -68,9 +83,13 @@ socket.on('create', function(rooms) {
       else {
         alert("입장 가능 인원이 초과되어 입장이 불가능합니다");
       }
-
     });
   }
+
+});
+
+socket.on("delete_error", () => {
+  alert("회의룸 안에 사람이 있습니다.");
 });
 
 socket.on('full', function(room) {
@@ -106,3 +125,4 @@ window.onbeforeunload = function() {
 
   sendMessage('bye');
 };
+
