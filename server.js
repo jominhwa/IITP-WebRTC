@@ -13,12 +13,16 @@ var express = require('express');
 var app = express();
 
 const options = {
-  key: fs.readFileSync('./../../../../etc/letsencrypt/live/pingppung.xyz/privkey.pem'),
-  cert: fs.readFileSync('./../../../../etc/letsencrypt/live/pingppung.xyz/cert.pem')
-//  key: fs.readFileSync('./../../../../etc/letsencrypt/live/vladek.xyz/privkey.pem'),
-//  cert: fs.readFileSync('./../../../../etc/letsencrypt/live/vladek.xyz/cert.pem')
-
+  key: fs.readFileSync(__dirname + '/../private.pem'),
+  cert: fs.readFileSync(__dirname + '/../public.pem') 
 };
+/*
+const options = {
+  key: fs.readFileSync('./../../../../etc/letsencrypt/live/본인 도메인 주소/privkey.pem'),
+  cert: fs.readFileSync('./../../../../etc/letsencrypt/live/본인 도메인 주소/cert.pem')
+};
+*/
+
 
 //app.use(static(path.join(__dirname, 'public')));
 
