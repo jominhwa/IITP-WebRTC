@@ -23,7 +23,6 @@ const options = {
 };
 */
 
-
 //app.use(static(path.join(__dirname, 'public')));
 
 
