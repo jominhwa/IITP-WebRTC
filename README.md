@@ -30,7 +30,7 @@ npm 6.14.14
 3. 회의방
 <img src="https://user-images.githubusercontent.com/57535999/146340461-a771f825-5f46-4473-9ee8-06714e006ca0.png" width="400" height="300">
 
-## 설정 및 실행
+## 설정
 본인 도메인이 없을 경우 OpenSSL을 이용하여 키를 생성한 다음 node 서버 코드 수정
 ```c
 ..
@@ -49,6 +49,20 @@ const options = {
 };
 ..
 ```
+그리고 turn서버 설치 방법을 찾아 설치하고 ICE 사이트에서 잘 실행되는지 확인한 다음 main.js에서 turn서버 정보 수정
+
+
+```c
+..
+var pcConfig = {
+  'iceServers': [
+     { 'urls': 'stun:stun.l.google.com:19302' },
+     { 'urls': 'turn:본인 도메인 주소', 'username': '계정', 'credential': '비밀번호'}
+  ]
+};
+..
+```
+## 실행
 코드를 수정한 후 다음 명령을 실행
 ```c
 sudo node server.js
